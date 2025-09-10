@@ -1,24 +1,28 @@
 const API_URL = "http://localhost:3000/api/alunos";
 
-// Mensagens
+// Exibir mensagens na tela
 function mostrarMensagem(texto, tipo = "info") {
     const div = document.getElementById("mensagens");
     div.innerHTML = `<p class="alerta alerta-${tipo}">${texto}</p>`;
     setTimeout(() => div.innerHTML = "", 3000);
 }
 
-// Carregar lista
+// Carregar lista de alunos
 async function carregarAlunos() {
     try {
         const res = await fetch(API_URL);
         const data = await res.json();
-        atualizarTabela(data.dados);
+        if (data.sucesso) {
+            atualizarTabela(data.dados);
+        } else {
+            mostrarMensagem(data.mensagem || data.erro, "erro");
+        }
     } catch (err) {
         mostrarMensagem("Erro ao carregar alunos: " + err.message, "erro");
     }
 }
 
-// Atualizar tabela
+// Atualizar tabela com alunos
 function atualizarTabela(alunos) {
     const tbody = document.getElementById("tabelaAlunos");
     tbody.innerHTML = "";
@@ -39,7 +43,7 @@ function atualizarTabela(alunos) {
     });
 }
 
-// Preencher formulário ao clicar em aluno
+// Preencher formulário ao clicar numa linha da tabela
 function preencherFormulario(aluno) {
     document.getElementById("alunoId").value = aluno.id;
     document.getElementById("nome").value = aluno.nome;
@@ -50,7 +54,7 @@ function preencherFormulario(aluno) {
     document.getElementById("escola").value = aluno.escola;
 }
 
-// Obter dados do formulário
+// Pegar dados do formulário
 function obterDadosFormulario() {
     return {
         nome: document.getElementById("nome").value,
@@ -62,7 +66,7 @@ function obterDadosFormulario() {
     };
 }
 
-// Criar
+// Criar aluno
 async function criarAluno() {
     try {
         const aluno = obterDadosFormulario();
@@ -72,19 +76,20 @@ async function criarAluno() {
             body: JSON.stringify(aluno)
         });
         const data = await res.json();
+
         if (data.sucesso) {
             mostrarMensagem("Aluno criado!", "sucesso");
             carregarAlunos();
             limparFormulario();
         } else {
-            mostrarMensagem(data.mensagem, "erro");
+            mostrarMensagem(data.mensagem || data.erro, "erro");
         }
     } catch (err) {
         mostrarMensagem("Erro: " + err.message, "erro");
     }
 }
 
-// Atualizar
+// Atualizar aluno
 async function atualizarAluno() {
     const id = document.getElementById("alunoId").value;
     if (!id) return mostrarMensagem("Selecione um aluno!", "erro");
@@ -97,19 +102,20 @@ async function atualizarAluno() {
             body: JSON.stringify(aluno)
         });
         const data = await res.json();
+
         if (data.sucesso) {
             mostrarMensagem("Aluno atualizado!", "sucesso");
             carregarAlunos();
             limparFormulario();
         } else {
-            mostrarMensagem(data.mensagem, "erro");
+            mostrarMensagem(data.mensagem || data.erro, "erro");
         }
     } catch (err) {
         mostrarMensagem("Erro: " + err.message, "erro");
     }
 }
 
-// Deletar
+// Deletar aluno
 async function deletarAluno() {
     const id = document.getElementById("alunoId").value;
     if (!id) return mostrarMensagem("Selecione um aluno!", "erro");
@@ -117,23 +123,24 @@ async function deletarAluno() {
     try {
         const res = await fetch(`${API_URL}/${id}`, { method: "DELETE" });
         const data = await res.json();
+
         if (data.sucesso) {
             mostrarMensagem("Aluno deletado!", "sucesso");
             carregarAlunos();
             limparFormulario();
         } else {
-            mostrarMensagem(data.mensagem, "erro");
+            mostrarMensagem(data.mensagem || data.erro, "erro");
         }
     } catch (err) {
         mostrarMensagem("Erro: " + err.message, "erro");
     }
 }
 
-// Limpar
+// Limpar formulário
 function limparFormulario() {
     document.getElementById("formAluno").reset();
     document.getElementById("alunoId").value = "";
 }
 
-// Inicializar
+// Inicializar a tabela assim que carregar a página
 document.addEventListener("DOMContentLoaded", carregarAlunos);
