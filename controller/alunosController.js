@@ -23,10 +23,19 @@ function salvarArquivo(alunos) {
     fs.writeFileSync(caminhoArquivo, JSON.stringify(alunos, null, 2));
 }
 
-// Criar aluno
+// Função para criar um novo aluno
 function criarAluno(dados) {
+    // Lê os alunos já cadastrados
     const alunos = lerArquivo();
-    const id = alunos.length > 0 ? alunos[alunos.length - 1].id + 1 : 1;
+
+    // Define o ID do novo aluno
+    // Se houver alunos, pega o último ID e adiciona 1, caso contrário começa em 1
+    let id = 1;
+    if (alunos.length > 0) {
+        id = alunos[alunos.length - 1].id + 1;
+    }
+
+    // Cria o objeto do novo aluno combinando o ID com os dados recebidos
     const novoAluno = { id, ...dados };
     alunos.push(novoAluno);
     salvarArquivo(alunos);
